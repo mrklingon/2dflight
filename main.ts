@@ -1,6 +1,7 @@
 namespace SpriteKind {
     export const rck = SpriteKind.create()
     export const sht = SpriteKind.create()
+    export const sttn = SpriteKind.create()
 }
 function right () {
     Enterprise.setImage(assets.image`ship1`)
@@ -10,6 +11,12 @@ function right () {
 controller.up.onEvent(ControllerButtonEvent.Pressed, function () {
     setScroll(2)
 })
+function mkStation () {
+    station = sprites.create(assets.image`DS9`, SpriteKind.sttn)
+    station.setFlag(SpriteFlag.DestroyOnWall, true)
+    station.setVelocity(randint(-70, -30), 0)
+    station.setPosition(159, randint(20, 90))
+}
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     droid += 1
     if (droid > 1) {
@@ -72,6 +79,9 @@ function left () {
     setScroll(1)
     pdir = -1
 }
+sprites.onCreated(SpriteKind.sttn, function (sprite) {
+    scount += 1
+})
 controller.left.onEvent(ControllerButtonEvent.Pressed, function () {
     left()
 })
@@ -91,6 +101,9 @@ sprites.onOverlap(SpriteKind.rck, SpriteKind.sht, function (sprite, otherSprite)
 controller.right.onEvent(ControllerButtonEvent.Pressed, function () {
     right()
 })
+sprites.onDestroyed(SpriteKind.sttn, function (sprite) {
+    scount = 0
+})
 function guideBlast () {
     blast = sprites.createProjectileFromSprite(assets.image`phaser`, Enterprise, pdir * 200, 0)
     light.setAll(0x00ff00)
@@ -100,6 +113,9 @@ function guideBlast () {
 }
 controller.down.onEvent(ControllerButtonEvent.Pressed, function () {
     setScroll(4)
+})
+sprites.onOverlap(SpriteKind.Player, SpriteKind.sttn, function (sprite, otherSprite) {
+    info.setLife(10)
 })
 sprites.onOverlap(SpriteKind.rck, SpriteKind.Player, function (sprite, otherSprite) {
     sprite.destroy(effects.fire, 500)
@@ -114,6 +130,8 @@ let move = 0
 let shtl: Sprite = null
 let ast: Sprite = null
 let blast: Sprite = null
+let station: Sprite = null
+let scount = 0
 let droid = 0
 let pdir = 0
 let Enterprise: Sprite = null
@@ -133,6 +151,7 @@ scroller.setLayerImage(scroller.BackgroundLayer.Layer0, assets.image`background1
 scroller.setLayerImage(scroller.BackgroundLayer.Layer1, assets.image`background2`)
 scroller.setLayerImage(scroller.BackgroundLayer.Layer2, assets.image`background3`)
 droid = 0
+scount = 0
 forever(function () {
     pause(250 * randint(3, 8))
     ast = sprites.create(rocks[randint(0, 3)], SpriteKind.rck)
@@ -177,4 +196,8 @@ forever(function () {
         Enterprise.y += randint(-30, 30)
         pause(250 * randint(3, 6))
     }
+})
+forever(function () {
+    pause(1000 * randint(3, 10))
+    mkStation()
 })
